@@ -1,0 +1,123 @@
+import pyttsx3
+import speech_recognition as sr
+import datetime
+import wikipedia
+import webbrowser
+import os
+import smtplib
+
+class ShakthiAssistant:
+    def __init__(self):
+        # Initialize speech engine
+        self.engine = pyttsx3.init('sapi5')
+        self.voices = self.engine.getProperty('voices')
+        self.engine.setProperty('voice', self.voices[0].id)  # Set to male voice
+        self.username = ""  # To store user's name dynamically
+
+    def speak(self, audio):
+        self.engine.say(audio)
+        self.engine.runAndWait()
+
+    def takeCommand(self):
+        # It takes microphone input from the user and returns string output
+        r = sr.Recognizer()
+        with sr.Microphone() as source:
+            print("Listening...")
+            r.pause_threshold = 0.5
+            audio = r.listen(source)
+
+        try:
+            print("Recognizing...")
+            query = r.recognize_google(audio, language='en-in')
+            print(f"User said: {query}\n")
+        except Exception as e:
+            print("Say that again please...")
+            return "None"
+        return query
+
+    def wishMe(self):
+        hour = int(datetime.datetime.now().hour)
+        if hour >= 0 and hour < 12:
+            greeting = "Good Morning!"
+        elif hour >= 12 and hour < 18:
+            greeting = "Good Afternoon!"
+        else:
+            greeting = "Good Evening!"
+        
+        self.speak(f"{greeting} I am Shakthi. May I know your name, please?")
+        print(f"{greeting} I am Shakthi. May I know your name, please?")
+        
+        self.username = self.takeCommand()
+        
+        if self.username == "None":
+            self.speak("I did not catch your name, can you please repeat?")
+            self.username = self.takeCommand()
+
+        self.speak(f"Hello, {self.username}! How can I assist you today?")
+        print(f"Hello, {self.username}! How can I assist you today?")
+
+    def sendEmail(self, to, content):
+        # This function is just a placeholder. You need to configure it for your email provider
+        # Example: Using SMTP for Gmail, you would use smtplib.SMTP with proper authentication
+        pass
+
+    def run(self):
+        self.wishMe()
+        while True:
+            query = self.takeCommand().lower()
+
+            # Logic for executing tasks based on query
+            if 'wikipedia' in query:
+                self.speak('Searching Wikipedia...')
+                query = query.replace("wikipedia", "")
+                results = wikipedia.summary(query, sentences=2)
+                self.speak("According to Wikipedia")
+                print(results)
+                self.speak(results)
+
+            elif 'open youtube' in query:
+                webbrowser.open("youtube.com")
+
+            elif 'open google' in query:
+                webbrowser.open("google.com")
+
+            elif 'open stack overflow' in query:
+                webbrowser.open("stackoverflow.com")
+
+            elif 'play music' in query:
+                music_dir = 'https://open.spotify.com/playlist/0lkUhgbqXfuverFw3CznN3?si=8eb0f7054bd54077'
+                os.startfile(music_dir)
+
+            elif 'the time' in query or 'what is the time' in query:
+                strTime = datetime.datetime.now().strftime("%H:%M:%S")
+                self.speak(f"{self.username}, the time is {strTime}")
+
+            elif 'who am i' in query:
+                self.speak(f"You are {self.username}, a wonderful person!")
+
+            elif 'who is my best friend' in query:
+                self.speak("Bakkodu is your best friend")
+
+            elif 'who are you' in query:
+                self.speak(f"I am Shakthi, your personal assistant, {self.username}!")
+
+            elif 'open dev c' in query:
+                os.startfile('C:\\Program Files (x86)\\Dev-Cpp\\devcpp.exe')
+            elif 'Bye' in query:
+                self.speak("Have a great day, sir!")
+
+            elif 'email to koushik' in query:
+                try:
+                    self.speak("What should I say?")
+                    content = self.takeCommand()
+                    to = "koushikmunnaluri@gmail.com"
+                    self.sendEmail(to, content)
+                    self.speak("Email has been sent!")
+                except Exception as e:
+                    print(e)
+                    self.speak(f"Sorry {self.username}. I am not able to send this email")
+
+# Create instance of ShakthiAssistant and run
+if __name__ == "__main__":
+    assistant = ShakthiAssistant()
+    assistant.run()
